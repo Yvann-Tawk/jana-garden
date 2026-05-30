@@ -110,7 +110,7 @@ class Base extends Phaser.Scene {
   setupPlayer(spawn){
     this.px=spawn.x; this.py=spawn.y; this.pdir='down'; this.pmove=false;
     this.jana=this.add.sprite(this.px*TILE+TILE/2,this.py*TILE+TILE/2,'jana_down',0)
-      .setScale(SCALE*0.9).setOrigin(0.5,0.78).setDepth(99999);
+      .setScale(SCALE*0.6).setOrigin(0.5,0.78).setDepth(99999);
     this.jana.setFrame(0);
     this.cameras.main.startFollow(this.jana,true,0.1,0.1);
     this.cameras.main.setZoom(this.zoomLevel||1.4);
@@ -127,7 +127,7 @@ class Base extends Phaser.Scene {
       const dir=mx<0?'left':mx>0?'right':my<0?'up':'down';
       if(!this.pmove||dir!==this.pdir){ this.pdir=dir; this.jana.play('jana_walk_'+dir,true); }
       this.pmove=true;
-      const spd=4.5*dt;
+      const spd=6*dt;
       const nx=this.px+mx*spd, ny=this.py+my*spd;
       if(this.canWalk(nx,this.py,solid,cols,rows)) this.px=nx;
       if(this.canWalk(this.px,ny,solid,cols,rows)) this.py=ny;
@@ -138,9 +138,13 @@ class Base extends Phaser.Scene {
   }
 
   canWalk(px,py,solid,cols,rows){
-    const tx=Math.floor(px+0.5), ty=Math.floor(py+0.5);
+    const tx=Math.floor(px), ty=Math.floor(py);
     if(tx<0||ty<0||tx>=cols||ty>=rows) return false;
-    if(solid && solid[ty] && solid[ty][tx]) return false;
+    // check the tile and adjacent tiles leniently
+    for(let dy=0;dy<=0;dy++) for(let dx=0;dx<=0;dx++){
+      const cx=tx+dx, cy=ty+dy;
+      if(cx>=0&&cy>=0&&cx<cols&&cy<rows&&solid&&solid[cy]&&solid[cy][cx]) return false;
+    }
     return true;
   }
 }
@@ -149,7 +153,7 @@ class Base extends Phaser.Scene {
 //  CABIN INTERIOR SCENE
 // ═══════════════════════════════════════════════════════════════
 class Cabin extends Base {
-  constructor(){ super('Cabin'); this.zoomLevel=2.0; }
+  constructor(){ super('Cabin'); this.zoomLevel=1.3; }
   preload(){ this.load.image('map_in','assets/map_inside.png'); this.preloadCommon(); }
   create(){
     activeScene=this;
@@ -214,7 +218,7 @@ class Cabin extends Base {
 //  GARDEN SCENE
 // ═══════════════════════════════════════════════════════════════
 class Garden extends Base {
-  constructor(){ super('Garden'); this.zoomLevel=1.4; }
+  constructor(){ super('Garden'); this.zoomLevel=0.9; }
   preload(){ this.load.image('map_out','assets/map_outside.png'); this.preloadCommon(); }
   create(data){
     activeScene=this;
